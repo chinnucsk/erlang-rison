@@ -13,3 +13,6 @@ clean:
 
 test: compile
 	erl $(EFLAGS) -noshell -eval 'ok = rison_test:all(), c:q().'
+
+i: compile
+	erl $(EFLAGS) -eval 'c:l(rison).'
