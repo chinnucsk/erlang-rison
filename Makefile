@@ -4,7 +4,7 @@ EFLAGS=-pa ebin
 
 all: compile
 
-compile:
+compile: clean
 	test -d ebin || mkdir ebin
 	erl $(EFLAGS) -make
 
