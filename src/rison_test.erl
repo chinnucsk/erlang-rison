@@ -38,6 +38,7 @@ encode() ->
     , {"abc def", "'abc def'"}
     , {"user@domain.com", "'user@domain.com'"}
     , {"US $10", "'US $10'"}
+    , {"Iñtërnâtiônàlizætiøn", "'Iñtërnâtiônàlizætiøn'"}
     , {{object, []}, "()"}
     , {{object, [{'a',0}]}, "(a:0)"}
     , {{object, [{'id',undefined}, {'type','/common/document'}]}, "(id:!n,type:/common/document)"}
@@ -74,6 +75,7 @@ decode() ->
     , {"'abc def'", "abc def"}
     , {"'user@domain.com'", "user@domain.com"}
     , {"'US $10'", "US $10"}
+    , {"'Iñtërnâtiônàlizætiøn'", "Iñtërnâtiônàlizætiøn"}
     , {"()", {object, []}}
     , {"(a:0)", {object, [{a,0}]}}
     , {"(id:!n,type:/common/document)", {object, [{id,undefined}, {type,'/common/document'}]}}
