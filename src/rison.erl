@@ -1,5 +1,4 @@
 -module(rison).
--vsn(20080513).
 
 -export([load/1]).
 -export([dump/1]).
