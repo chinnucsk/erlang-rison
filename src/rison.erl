@@ -61,16 +61,13 @@ encode_exp(N) when is_integer(N) ->
   [$e|integer_to_list(N)].
 
 encode_array(Values) ->
-  "!(" ++ implode($,, lists:map(fun encode/1, Values)) ++ ")".
+  "!(" ++ string:join(lists:map(fun encode/1, Values), ",") ++ ")".
 
 encode_object(Attrs) ->
-  "(" ++ implode($,, lists:map(fun encode_object_pair/1, Attrs)) ++ ")".
+  "(" ++ string:join(lists:map(fun encode_object_pair/1, Attrs), ",") ++ ")".
 
 encode_object_pair({Key, Value}) ->
-  implode($:, [encode(Key), encode(Value)]).
-
-implode(Sep, Strings) when is_integer(Sep) ->
-  lists:foldr(fun(Str, []) -> Str; (Str, Acc) -> Str ++ [Sep|Acc] end, [], Strings).
+  string:join([encode(Key), encode(Value)], ":").
 
 encode_string_or_id([]) -> "''";
 encode_string_or_id(Input) ->
