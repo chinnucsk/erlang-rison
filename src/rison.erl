@@ -1,9 +1,6 @@
 -module(rison).
 
--export([load/1]).
--export([dump/1]).
--export([encode/1]).
--export([decode/1]).
+-export([load/1, dump/1, encode/1, decode/1]).
 
 -define(is_digit(C), C >= $0, C =< $9).
 -define(is_alpha(C), C >= $A, C =< $Z; C >= $a, C =< $z).

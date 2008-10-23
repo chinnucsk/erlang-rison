@@ -1,9 +1,6 @@
 -module(rison_test).
 
--export([all/0]).
--export([encode/0]).
--export([decode/0]).
--export([invalid/0]).
+-export([all/0, encode/0, decode/0, invalid/0]).
 
 
 all() ->
