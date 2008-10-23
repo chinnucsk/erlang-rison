@@ -1,6 +1,6 @@
-===============
-Rison In Erlang
-===============
+============
+erlang-rison
+============
 
 
 What is this?
