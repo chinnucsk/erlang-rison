@@ -8,6 +8,7 @@
 -define(is_idstart(C), ?is_alpha(C); C =:= $_; C =:= $.; C =:= $/; C =:= $~).
 -define(is_idchar(C), ?is_idstart(C); ?is_digit(C); C =:= $-).
 
+-include_lib("eunit/include/eunit.hrl").
 
 load(Input) ->
   catch_invalid_input(fun() -> decode(Input) end).
@@ -209,3 +210,83 @@ decode_array(Input, Values) ->
 take_value(Input) ->
   {Value, Etc} = lists:splitwith(fun(C) -> C =/= $, andalso C =/= $) end, Input),
   {decode(Value), Etc}.
+
+encode_test_() -> [
+    ?_assertEqual("!t", encode(true))
+  , ?_assertEqual("!f", encode(false))
+  , ?_assertEqual("!n", encode(undefined))
+  , ?_assertEqual("0", encode(0))
+  , ?_assertEqual("42", encode(42))
+  , ?_assertEqual("-42", encode(-42))
+  , ?_assertEqual("1.5", encode({number, 1, 5, undefined}))
+  , ?_assertEqual("99.99", encode({number, 99, 99, undefined}))
+  , ?_assertEqual("99.09", encode({number, 99, '09', undefined}))
+  , ?_assertEqual("1e30", encode({number, 1, undefined, 30}))
+  , ?_assertEqual("1e-30", encode({number, 1, undefined, -30}))
+  , ?_assertEqual("1.5e2", encode({number, 1, '5', 2}))
+  , ?_assertEqual("1.5e-2", encode({number, 1, '5', -2}))
+  , ?_assertEqual("a", encode('a'))
+  , ?_assertEqual("a-z", encode('a-z'))
+  , ?_assertEqual("domain.com", encode('domain.com'))
+  , ?_assertEqual("''", encode(""))
+  , ?_assertEqual("'0a'", encode("0a"))
+  , ?_assertEqual("'-h'", encode("-h"))
+  , ?_assertEqual("'can!'t'", encode("can't"))
+  , ?_assertEqual("'wow!!'", encode("wow!"))
+  , ?_assertEqual("'abc def'", encode("abc def"))
+  , ?_assertEqual("'user@domain.com'", encode("user@domain.com"))
+  , ?_assertEqual("'US $10'", encode("US $10"))
+  , ?_assertEqual("'Iñtërnâtiônàlizætiøn'", encode("Iñtërnâtiônàlizætiøn"))
+  , ?_assertEqual("()", encode({object, []}))
+  , ?_assertEqual("(a:0)", encode({object, [{'a',0}]}))
+  , ?_assertEqual("(id:!n,type:/common/document)", encode({object, [{'id',undefined}, {'type','/common/document'}]}))
+  , ?_assertEqual("(id:!n,type:/common/document)", encode({object, [{"id",undefined}, {"type","/common/document"}]}))
+  , ?_assertEqual("!()", encode({array, []}))
+  , ?_assertEqual("!(!t,!f,!n,'')", encode({array, [true,false,undefined,""]}))
+  ].
+
+decode_test_() -> [
+    ?_assertEqual(true, decode("!t"))
+  , ?_assertEqual(false, decode("!f"))
+  , ?_assertEqual(undefined, decode("!n"))
+  , ?_assertEqual(0, decode("0"))
+  , ?_assertEqual(1, decode("1"))
+  , ?_assertEqual(12, decode("12"))
+  , ?_assertEqual(-3, decode("-3"))
+  , ?_assertEqual(-33, decode("-33"))
+  , ?_assertEqual({number, 1, '5', undefined}, decode("1.5"))
+  , ?_assertEqual({number, 99, '99', undefined}, decode("99.99"))
+  , ?_assertEqual({number, 99, '09', undefined}, decode("99.09"))
+  , ?_assertEqual({number, 1, undefined, 30}, decode("1e30"))
+  , ?_assertEqual({number, 1, undefined, -30}, decode("1e-30"))
+  , ?_assertEqual({number, 1, '5', 2}, decode("1.5e2"))
+  , ?_assertEqual({number, 1, '5', -2}, decode("1.5e-2"))
+  , ?_assertEqual(a, decode("a"))
+  , ?_assertEqual('a-z', decode("a-z"))
+  , ?_assertEqual('domain.com', decode("domain.com"))
+  , ?_assertEqual("", decode("''"))
+  , ?_assertEqual("0a", decode("'0a'"))
+  , ?_assertEqual("-h", decode("'-h'"))
+  , ?_assertEqual("can't", decode("'can!'t'"))
+  , ?_assertEqual("wow!", decode("'wow!!'"))
+  , ?_assertEqual("abc def", decode("'abc def'"))
+  , ?_assertEqual("user@domain.com", decode("'user@domain.com'"))
+  , ?_assertEqual("US $10", decode("'US $10'"))
+  , ?_assertEqual("Iñtërnâtiônàlizætiøn", decode("'Iñtërnâtiônàlizætiøn'"))
+  , ?_assertEqual({object, []}, decode("()"))
+  , ?_assertEqual({object, [{a,0}]}, decode("(a:0)"))
+  , ?_assertEqual({object, [{id,undefined}, {type,'/common/document'}]}, decode("(id:!n,type:/common/document)"))
+  , ?_assertEqual({array, []}, decode("!()"))
+  , ?_assertEqual({array, [true,false,undefined,""]}, decode("!(!t,!f,!n,'')"))
+  ].
+
+decode_invalid_input_test_() -> [
+    ?_assertError(_, decode("-h"))
+  , ?_assertError(_, decode("1.5e+2"))
+  , ?_assertError(_, decode("1.5E2"))
+  , ?_assertError(_, decode("1.5E+2"))
+  , ?_assertError(_, decode("1.5E-2"))
+  , ?_assertError(_, decode("abc def"))
+  , ?_assertError(_, decode("US $10"))
+  , ?_assertError(_, decode("user@domain.com"))
+  ].
